@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAuthUser } from "../lib/api.js";
+import { getAuthUser } from "../lib/api";
 
 const useAuthUser = () => {
      const authUser = useQuery({
@@ -8,6 +8,6 @@ const useAuthUser = () => {
     retry : false
   });
   return { isLoading: authUser.isLoading, authUser: authUser.data?.user };
-}
+};
 
 export default useAuthUser

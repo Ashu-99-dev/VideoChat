@@ -4,13 +4,13 @@ import FriendRequest from "../models/FriendRequest.js";
 
 export async function getRecommendedUsers(req, res) {
     try {
-        const currentUserId = req.user._id;
+        const currentUserId = req.user.id;
         const currentUser = req.user;
         const recommendedUsers = await User.find({
             $and: [
                 { _id: { $ne: currentUserId } }, // Exclude current user
                 {
-                    _id: { $nin: currentUser.friends } // Exclude current user's friends
+                 _id: { $nin: currentUser.friends } // Exclude current user's friends
                 },
                 { isOnboarded: true } // Only include users who have completed onboarding
             ]
@@ -26,13 +26,11 @@ export async function getRecommendedUsers(req, res) {
 
 export async function getMyFriends(req, res) {
     try {
-        const user = await User.findById(req.user._id)
+        const user = await User.findById(req.user.id)
+            .select("friends")
             .populate("friends", "fullName profilePicture nativeLanguage learningLanguage ")
 
-        res.status(200).json({
-            success: true,
-            friends: user.friends
-        });
+        res.status(200).json(user.friends);
 
     } catch (error) {
         console.log("Error in getMyFriends controller", error.message);
