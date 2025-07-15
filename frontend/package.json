@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@stream-io/video-react-sdk": "^1.14.4",
+    "@stream-io/video-react-sdk": "^1.18.12",
     "@tanstack/react-query": "^5.74.4",
     "axios": "^1.8.4",
     "lucide-react": "^0.503.0",
@@ -20,10 +20,11 @@
     "react-router": "^7.5.1",
     "stream-chat": "^8.60.0",
     "stream-chat-react": "^12.14.0",
+    "videochat": "file:..",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-     "@eslint/js": "^9.22.0",
+    "@eslint/js": "^9.22.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",

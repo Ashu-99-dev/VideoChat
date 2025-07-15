@@ -46,8 +46,11 @@ const ChatPage = () => {
       try {
         console.log("Initializing stream chat client...");
 
-        const client = StreamChat.getInstance(STREAM_API_KEY);
-
+        let client = StreamChat.getInstance(STREAM_API_KEY);
+        if(client.userID)  {
+          await client.disconnectUser();
+          client = StreamChat.getInstance(STREAM_API_KEY); // Get a new instance after disconnecting
+        }
         await client.connectUser(
           {
             id: authUser._id,
