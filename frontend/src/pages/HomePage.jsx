@@ -7,16 +7,18 @@ import {
   sendFriendRequest,
 } from "../lib/api";
 import { Link } from "react-router";
-import { CheckCircleIcon, MapPinIcon, UserPlusIcon, UsersIcon } from "lucide-react";
+import { CheckCircleIcon, MapPinIcon, UserPlusIcon, UsersIcon, Sparkles } from "lucide-react";
 
 import { capitialize } from "../lib/utils";
 
 import FriendCard, { getLanguageFlag } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
+import useAuthUser from "../hooks/useAuthUser";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
   const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
+  const { authUser } = useAuthUser();
 
    const { data: friends = [], isLoading: loadingFriends } = useQuery({
     queryKey: ["friends"],
@@ -47,6 +49,22 @@ const HomePage = () => {
       setOutgoingRequestsIds(outgoingIds);
     }
   }, [outgoingFriendReqs]);
+
+  // Helper function to get language match type
+  const getLanguageMatchType = (user) => {
+    if (!authUser || !user) return "none";
+    
+    const perfectMatch = 
+      authUser.learningLanguage === user.nativeLanguage &&
+      authUser.nativeLanguage === user.learningLanguage;
+    
+    if (perfectMatch) return "perfect";
+    
+    const partialMatch = authUser.learningLanguage === user.nativeLanguage;
+    if (partialMatch) return "partial";
+    
+    return "none";
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -101,6 +119,7 @@ const HomePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recommendedUsers.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
+                const matchType = getLanguageMatchType(user);
 
                 return (
                   <div
@@ -123,6 +142,19 @@ const HomePage = () => {
                           )}
                         </div>
                       </div>
+
+                      {/* Language Match Badge */}
+                      {matchType === "perfect" && (
+                        <div className="badge badge-success gap-1">
+                          <Sparkles className="size-3" />
+                          Perfect Language Match!
+                        </div>
+                      )}
+                      {matchType === "partial" && (
+                        <div className="badge badge-primary gap-1">
+                          Can teach you {capitialize(authUser.learningLanguage)}
+                        </div>
+                      )}
 
                       {/* Languages with flags */}
                       <div className="flex flex-wrap gap-1.5">
