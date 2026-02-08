@@ -12,12 +12,40 @@ export async function getRecommendedUsers(req, res) {
         { _id: { $nin: currentUser.friends } }, // exclude current user's friends
         { isOnboarded: true },
       ],
+    }).select('fullName profilePic bio interests nativeLanguage learningLanguage');
+
+    // Sort users by language match score (highest to lowest)
+    const sortedUsers = recommendedUsers.sort((a, b) => {
+      const scoreA = calculateLanguageMatchScore(currentUser, a);
+      const scoreB = calculateLanguageMatchScore(currentUser, b);
+      return scoreB - scoreA; // Higher scores first
     });
-    res.status(200).json(recommendedUsers);
+
+    res.status(200).json(sortedUsers);
   } catch (error) {
     console.error("Error in getRecommendedUsers controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
+}
+
+// Helper function to calculate language match score
+function calculateLanguageMatchScore(userA, userB) {
+  // Perfect bidirectional match: both can teach each other
+  // User A learns User B's native language AND User B learns User A's native language
+  if (
+    userA.learningLanguage === userB.nativeLanguage &&
+    userA.nativeLanguage === userB.learningLanguage
+  ) {
+    return 3; // Highest priority - perfect language exchange pair
+  }
+
+  // Partial match: User B can teach User A (but not vice versa)
+  if (userA.learningLanguage === userB.nativeLanguage) {
+    return 2; // Medium priority - User B speaks what User A wants to learn
+  }
+
+  // No language match
+  return 1; // Lowest priority - no language alignment
 }
 
 export async function getMyFriends(req, res) {

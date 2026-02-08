@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 import HomePage from "./pages/HomePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
+import VerifyEmailPage from "./pages/VerifyEmailPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import CallPage from "./pages/CallPage.jsx";
@@ -44,6 +45,12 @@ const App = () => {
           path="/signup"
           element={
             !isAuthenticated ? <SignUpPage /> : <Navigate to={isOnboarded ? "/" : "/onboarding"  }/>}
+        />
+        <Route
+          path="/verify-email"
+          element={
+            !isAuthenticated ? <VerifyEmailPage /> : <Navigate to={isOnboarded ? "/" : "/onboarding"} />
+          }
         />
         <Route
           path="/onboarding"
@@ -97,3 +104,4 @@ const App = () => {
 };
 
 export default App;
+

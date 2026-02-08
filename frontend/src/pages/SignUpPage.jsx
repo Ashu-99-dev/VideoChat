@@ -1,20 +1,48 @@
 import { useState } from "react";
-import { ShipWheelIcon } from "lucide-react";
-import { Link } from "react-router";
+import { ShipWheelIcon, Check, X, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate } from "react-router";
 import  useSignUp from "../hooks/useSignUp";
 
 const SignUpPage = () => {
+  const navigate = useNavigate();
   const [signupData, setSignupData] = useState({
     fullName: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { isPending, error, signupMutation } = useSignUp();
 
-  const handleSignup = (e) => {
+  // Password validation checks
+  const passwordChecks = {
+    length: signupData.password.length >= 8,
+    uppercase: /[A-Z]/.test(signupData.password),
+    lowercase: /[a-z]/.test(signupData.password),
+    number: /[0-9]/.test(signupData.password),
+    special: /[@$!%*?&]/.test(signupData.password),
+  };
+
+  const allChecksPassed = Object.values(passwordChecks).every(Boolean);
+  const passwordsMatch = signupData.password === signupData.confirmPassword;
+
+  const handleSignup = async (e) => {
     e.preventDefault();
-    signupMutation(signupData);
+    
+    if (!passwordsMatch) {
+      return;
+    }
+
+    const { confirmPassword, ...dataToSend } = signupData;
+    
+    signupMutation(dataToSend, {
+      onSuccess: (data) => {
+        // Redirect to OTP verification page
+        navigate("/verify-email", { state: { email: data.email } });
+      },
+    });
   };
 
   return (
@@ -36,7 +64,7 @@ const SignUpPage = () => {
           {/* ERROR MESSAGE IF ANY */}
           {error && (
             <div className="alert alert-error mb-4">
-              <span>{error.response.data.message}</span>
+              <span>{error?.response?.data?.message || error?.message || "An error occurred"}</span>
             </div>
           )}
 
@@ -70,6 +98,7 @@ const SignUpPage = () => {
                       required
                     />
                   </div>
+
                   {/* EMAIL */}
                   <div className="form-control w-full">
                     <label className="label">
@@ -86,27 +115,102 @@ const SignUpPage = () => {
                       required
                     />
                   </div>
+
                   {/* PASSWORD */}
                   <div className="form-control w-full">
                     <label className="label">
                       <span className="label-text">Password</span>
                     </label>
-                    <input
-                      type="password"
-                      placeholder="********"
-                      className="input input-bordered w-full"
-                      value={signupData.password}
-                      onChange={(e) =>
-                        setSignupData({
-                          ...signupData,
-                          password: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                    <p className="text-xs opacity-70 mt-1">
-                      Password must be at least 6 characters long
-                    </p>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="********"
+                        className="input input-bordered w-full pr-10"
+                        value={signupData.password}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            password: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                    
+                    {/* Password Requirements */}
+                    {signupData.password && (
+                      <div className="mt-2 p-3 bg-base-200 rounded-lg text-xs space-y-1">
+                        <p className="font-semibold mb-2">Password must contain:</p>
+                        <div className="space-y-1">
+                          <PasswordCheck 
+                            met={passwordChecks.length} 
+                            text="At least 8 characters" 
+                          />
+                          <PasswordCheck 
+                            met={passwordChecks.uppercase} 
+                            text="One uppercase letter (A-Z)" 
+                          />
+                          <PasswordCheck 
+                            met={passwordChecks.lowercase} 
+                            text="One lowercase letter (a-z)" 
+                          />
+                          <PasswordCheck 
+                            met={passwordChecks.number} 
+                            text="One number (0-9)" 
+                          />
+                          <PasswordCheck 
+                            met={passwordChecks.special} 
+                            text="One special character (@$!%*?&)" 
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* CONFIRM PASSWORD */}
+                  <div className="form-control w-full">
+                    <label className="label">
+                      <span className="label-text">Confirm Password</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="********"
+                        className={`input input-bordered w-full pr-10 ${
+                          signupData.confirmPassword && !passwordsMatch ? 'input-error' : ''
+                        }`}
+                        value={signupData.confirmPassword}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            confirmPassword: e.target.value,
+                          })
+                        }
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/50 hover:text-base-content"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                    {signupData.confirmPassword && !passwordsMatch && (
+                      <p className="text-xs text-error mt-1">Passwords do not match</p>
+                    )}
+                    {signupData.confirmPassword && passwordsMatch && (
+                      <p className="text-xs text-success mt-1 flex items-center gap-1">
+                        <Check size={14} /> Passwords match
+                      </p>
+                    )}
                   </div>
 
                   <div className="form-control">
@@ -130,14 +234,22 @@ const SignUpPage = () => {
                   </div>
                 </div>
 
-                <button className="btn btn-primary w-full" type="submit">
+                <button 
+                  className="btn btn-primary w-full" 
+                  type="submit"
+                  disabled={
+                    isPending || 
+                    (signupData.password && !allChecksPassed) ||
+                    (signupData.confirmPassword && !passwordsMatch)
+                  }
+                >
                   {isPending ? (
                     <>
                       <span className="loading loading-spinner loading-xs"></span>
-                      Loading...
+                      Creating Account...
                     </>
                   ) : (
-                    "Account Created"
+                    "Create Account"
                   )}
                 </button>
 
@@ -181,5 +293,17 @@ const SignUpPage = () => {
     </div>
   );
 };
+
+// Password check component
+const PasswordCheck = ({ met, text }) => (
+  <div className="flex items-center gap-2">
+    {met ? (
+      <Check className="size-4 text-success flex-shrink-0" />
+    ) : (
+      <X className="size-4 text-error flex-shrink-0" />
+    )}
+    <span className={met ? "text-success" : "opacity-60"}>{text}</span>
+  </div>
+);
 
 export default SignUpPage;
