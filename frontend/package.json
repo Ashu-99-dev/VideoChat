@@ -21,7 +21,8 @@
     "stream-chat": "^8.60.0",
     "stream-chat-react": "^12.14.0",
     "videochat": "file:..",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "vite": "^6.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
@@ -35,7 +36,6 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
     "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17",
-    "vite": "^6.3.1"
+    "tailwindcss": "^3.4.17"
   }
 }
